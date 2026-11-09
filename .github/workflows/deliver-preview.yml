@@ -24,15 +24,8 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: flutter analyze
       - run: flutter test --reporter expanded
-      - name: Check live PokeAPI Korean name contract
-        run: |
-          python3 - <<'PY'
-          import json, urllib.request
-          data = json.load(urllib.request.urlopen('https://pokeapi.co/api/v2/pokemon-species/1/', timeout=30))
-          assert data['id'] == 1
-          assert next(item['name'] for item in data['names'] if item['language']['name'] == 'ko') == '이상해씨'
-          print('PokeAPI Korean species contract verified')
-          PY
+      - name: Probe live PokeAPI; validate response when reachable
+        run: python3 tool/check_pokeapi.py
       - name: Build small installable ARM64 preview
         env:
           POKOPIA_PREVIEW_SIGNING: 'true'
