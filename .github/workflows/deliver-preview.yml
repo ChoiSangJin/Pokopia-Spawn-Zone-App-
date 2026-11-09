@@ -36,7 +36,7 @@ jobs:
           python3 tool/verify_arm64.py build/app/outputs/flutter-apk/app-debug.apk --debug
           BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
           "$BUILD_TOOLS/apksigner" verify --verbose build/app/outputs/flutter-apk/app-debug.apk
-          "$BUILD_TOOLS/aapt" dump badging build/app/outputs/flutter-apk/app-debug.apk | tee apk-badging.txt | grep "application-label:'포코피아 서식지 도감'"
+          "$BUILD_TOOLS/aapt2" dump badging build/app/outputs/flutter-apk/app-debug.apk | tee apk-badging.txt | grep "application-label:'포코피아 서식지 도감'"
           cp build/app/outputs/flutter-apk/app-debug.apk pokopia-habitat-guide-arm64-preview.apk
           sha256sum pokopia-habitat-guide-arm64-preview.apk > pokopia-habitat-guide-arm64-preview.apk.sha256
       - uses: actions/upload-artifact@v4
