@@ -34,7 +34,7 @@ class PokopiaApp extends StatelessWidget {
   const PokopiaApp({super.key});
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Pokopia Field Guide', debugShowCheckedModeBanner: false,
+    title: '포코피아 서식지 도감', debugShowCheckedModeBanner: false,
     theme: ThemeData(useMaterial3: true, colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff276952)), scaffoldBackgroundColor: const Color(0xfff5f7f1)),
     home: const CatalogView(),
   );

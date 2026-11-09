@@ -13,7 +13,7 @@ class CatalogView extends StatelessWidget {
     final t = context.read<Translations>();
     final visible = state.visible;
     return Scaffold(
-      appBar: AppBar(title: const Text('Pokopia • 서식지 도감'), actions: [IconButton(tooltip: '앱 정보', onPressed: () => showAboutDialog(context: context, applicationName: 'Pokopia Field Guide', applicationVersion: '1.0.0', children: [const Text('비공식 팬 도감 · 데이터: QuesoCaliente/pokopiapi. Nintendo 및 The Pokémon Company와 관련이 없습니다.')]), icon: const Icon(Icons.info_outline)), IconButton(tooltip: '새로고침', onPressed: state.loading ? null : state.refresh, icon: const Icon(Icons.refresh))]),
+      appBar: AppBar(title: const Text('포코피아 서식지 도감'), actions: [IconButton(tooltip: '앱 정보', onPressed: () => showAboutDialog(context: context, applicationName: '포코피아 서식지 도감', applicationVersion: '1.0.0', children: [const Text('비공식 팬 도감 · 데이터: QuesoCaliente/pokopiapi. Nintendo 및 The Pokémon Company와 관련이 없습니다.')]), icon: const Icon(Icons.info_outline)), IconButton(tooltip: '새로고침', onPressed: state.loading ? null : state.refresh, icon: const Icon(Icons.refresh))]),
       body: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 8), child: TextField(
           onChanged: state.search,

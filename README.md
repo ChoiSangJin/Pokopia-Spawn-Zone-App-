@@ -1,4 +1,4 @@
-# Pokopia Field Guide
+# 포코피아 서식지 도감
 
 별도 서버·외부 DB 없이 GitHub Raw JSON을 읽는 Flutter Android 포켓몬 서식지 도감입니다. Material 3, 반응형 2–6열 그리드, 이름/번호 검색, 타입 필터, Hero 상세 전환, 당겨서 갱신, 오류 재시도를 제공합니다.
 

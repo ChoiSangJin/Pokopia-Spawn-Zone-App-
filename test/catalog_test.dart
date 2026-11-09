@@ -9,6 +9,7 @@ import 'package:pokopia_spawn_zone/services/catalog_service.dart';
 import 'package:pokopia_spawn_zone/controllers/catalog_controller.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final fixture = File('test/fixtures/pokemon.json').readAsStringSync();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
@@ -51,7 +52,7 @@ void main() {
 
   test('invalid response cannot overwrite a valid cache', () async {
     final prefs = await SharedPreferences.getInstance();
-    final client = MockClient((_) async => http.Response(fixture, 200));
+    final client = MockClient((_) async => http.Response.bytes(utf8.encode(fixture), 200));
     await CatalogService(client, prefs).fetch();
     final original = prefs.getString(CatalogService.cacheKey);
     for (final response in ['{}', '[]', '[{"name":"bad"}]', 'not json']) {
@@ -64,7 +65,7 @@ void main() {
   test('first-launch failure and retry recover without restarting', () async {
     var requests = 0;
     final prefs = await SharedPreferences.getInstance();
-    final state = CatalogController(CatalogService(MockClient((_) async => ++requests == 1 ? http.Response('unavailable', 503) : http.Response(fixture, 200)), prefs));
+    final state = CatalogController(CatalogService(MockClient((_) async => ++requests == 1 ? http.Response('unavailable', 503) : http.Response.bytes(utf8.encode(fixture), 200)), prefs));
     await state.refresh();
     expect(state.error, isNotNull);
     expect(state.snapshot, isNull);

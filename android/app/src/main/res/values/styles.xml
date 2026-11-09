@@ -1,4 +1,5 @@
 <resources>
+    <color name="icon_background">#164C3A</color>
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar"><item name="android:windowBackground">#F5F7F1</item></style>
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar"><item name="android:windowBackground">?android:colorBackground</item></style>
 </resources>
