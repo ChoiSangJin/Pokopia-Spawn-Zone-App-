@@ -1,3 +1,5 @@
+import 'visual_fact.dart';
+
 typedef Json = Map<String, dynamic>;
 
 String? text(Object? value) =>
@@ -8,18 +10,33 @@ List<String> strings(Object? value) =>
     value is List ? value.whereType<String>().toList() : [];
 
 class Habitat {
-  const Habitat({required this.name, this.rarity});
+  const Habitat({required this.name, this.rarity, this.iconUrl});
   final String name;
   final int? rarity;
+  final String? iconUrl;
   factory Habitat.fromJson(Json json) => Habitat(
     name: text(json['name']) ?? '이름 미제공',
     rarity: (json['rarity'] as num?)?.toInt(),
+    iconUrl: text(json['iconUrl']),
   );
 }
 
 class Pokemon {
   Pokemon.fromJson(Json json)
-    : number = text(json['localNumber']) ?? '?',
+    : typeFacts = objects(json['types']).map(VisualFact.fromJson).toList(),
+      specialtyFacts = objects(
+        json['specialties'],
+      ).map(VisualFact.fromJson).toList(),
+      climateFacts = objects(
+        json['climates'],
+      ).map(VisualFact.fromJson).toList(),
+      timeFacts = objects(
+        json['timeAvailability'],
+      ).map(VisualFact.fromJson).toList(),
+      produceFact = json['produces'] is Json
+          ? VisualFact.fromJson(json['produces'] as Json)
+          : null,
+      number = text(json['localNumber']) ?? '?',
       nationalNumber = (json['nationalNumber'] as num?)?.toInt(),
       name = text(json['name']) ?? '이름 미제공',
       slug = text(json['slug']) ?? '',
@@ -56,6 +73,8 @@ class Pokemon {
           ? text((json['produces'] as Json)['name'])
           : null;
 
+  final List<VisualFact> typeFacts, specialtyFacts, climateFacts, timeFacts;
+  final VisualFact? produceFact;
   final String number, name, slug;
   final int? nationalNumber;
   final String? imageUrl,

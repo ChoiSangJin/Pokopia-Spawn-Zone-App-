@@ -21,6 +21,18 @@ void main() {
         jsonDecode(File('test/fixtures/pokemon.json').readAsStringSync())
             as List;
     final record = records.firstWhere((e) => e['localNumber'] == 'E007');
+    // Name/navigation test: keep network images out of this deterministic test.
+    for (final key in [
+      'types',
+      'specialties',
+      'climates',
+      'timeAvailability',
+      'habitats',
+    ]) {
+      for (final fact in (record[key] as List? ?? [])) {
+        fact['iconUrl'] = null;
+      }
+    }
     SharedPreferences.setMockInitialValues({
       CatalogService.cacheKey: jsonEncode({
         'savedAt': '2026-11-09T00:00:00Z',

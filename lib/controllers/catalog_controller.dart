@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/pokemon.dart';
 import '../services/catalog_service.dart';
 import '../services/korean_names.dart';
+import '../models/content_source.dart';
 
 class CatalogController extends ChangeNotifier {
   CatalogController(this.service, [this.names])
@@ -26,6 +27,18 @@ class CatalogController extends ChangeNotifier {
   String? error;
   String query = '';
   String? type;
+  String source = 'all';
+  int countSource(String scope) =>
+      snapshot?.pokemon
+          .where(
+            (p) => scope == 'all' || contentScope(p.contentSource) == scope,
+          )
+          .length ??
+      0;
+  void filterSource(String value) {
+    source = value;
+    notifyListeners();
+  }
 
   List<Pokemon> get visible => (snapshot?.pokemon ?? <Pokemon>[])
       .where(
@@ -35,7 +48,8 @@ class CatalogController extends ChangeNotifier {
                 ).toLowerCase().contains(query.toLowerCase().trim()) ||
                 p.name.toLowerCase().contains(query.toLowerCase().trim()) ||
                 p.number.toLowerCase().contains(query.toLowerCase().trim())) &&
-            (type == null || p.types.contains(type)),
+            (type == null || p.types.contains(type)) &&
+            (source == 'all' || contentScope(p.contentSource) == source),
       )
       .toList();
   List<String> get types =>

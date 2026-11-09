@@ -37,7 +37,7 @@ jobs:
           "$BUILD_TOOLS/apksigner" verify --verbose build/app/outputs/flutter-apk/app-release.apk
           "$BUILD_TOOLS/aapt2" dump badging build/app/outputs/flutter-apk/app-release.apk > apk-badging.txt
           grep "application-label:'포코피아 서식지 도감'" apk-badging.txt
-          grep "versionCode='2' versionName='1.1.0'" apk-badging.txt
+          grep "versionCode='3' versionName='1.2.0'" apk-badging.txt
           cp build/app/outputs/flutter-apk/app-release.apk pokopia-habitat-guide-arm64-preview.apk
           sha256sum pokopia-habitat-guide-arm64-preview.apk > pokopia-habitat-guide-arm64-preview.apk.sha256
       - uses: actions/upload-artifact@v4
@@ -49,4 +49,4 @@ jobs:
       - name: Publish downloadable APK prerelease
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create v1.1.0-preview.1 pokopia-habitat-guide-arm64-preview.apk pokopia-habitat-guide-arm64-preview.apk.sha256 --prerelease --target "$GITHUB_SHA" --title '포코피아 서식지 도감 1.1 · 한글 이름' --notes-file RELEASE_NOTES.md
+        run: gh release create v1.2.0-preview.1 pokopia-habitat-guide-arm64-preview.apk pokopia-habitat-guide-arm64-preview.apk.sha256 --prerelease --target "$GITHUB_SHA" --title '포코피아 서식지 도감 1.2 · 아이템과 이미지 서식지' --notes-file RELEASE_NOTES.md
