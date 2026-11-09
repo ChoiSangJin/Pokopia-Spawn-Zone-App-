@@ -1,0 +1,55 @@
+name: Verify Android
+on:
+  pull_request:
+  push:
+    branches: [main, feat/pokopia-android]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze 2>&1 | tee analyze.log
+        shell: bash
+      - run: flutter test --reporter expanded 2>&1 | tee test.log
+        shell: bash
+      - run: flutter build apk --release --target-platform android-arm64 2>&1 | tee build.log
+        shell: bash
+      - run: python3 tool/verify_arm64.py build/app/outputs/flutter-apk/app-release.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-arm64-unsigned
+          path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Save validation diagnostics
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/pokopia-android'
+        env:
+          VALIDATED_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib
+          parts = ['Validated commit: ' + os.environ['VALIDATED_SHA']]
+          for name in ['analyze.log', 'test.log', 'build.log']:
+              path = pathlib.Path(name)
+              if path.exists():
+                  parts += ['\n### ' + name, path.read_text()[-40000:]]
+          pathlib.Path('ci-report.txt').write_text('\n'.join(parts))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan ci-diagnostics
+          git rm -rf --cached .
+          git add ci-report.txt
+          git commit -m "Record validation diagnostics for $VALIDATED_SHA"
+          git push origin HEAD:refs/heads/ci/diagnostics --force

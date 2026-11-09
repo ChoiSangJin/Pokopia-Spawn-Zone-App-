@@ -1,0 +1,59 @@
+name: Deliver installable APK
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: deliver-preview
+  cancel-in-progress: false
+jobs:
+  deliver:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze
+      - run: flutter test --reporter expanded
+      - name: Check live PokeAPI Korean name contract
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          data = json.load(urllib.request.urlopen('https://pokeapi.co/api/v2/pokemon-species/1/', timeout=30))
+          assert data['id'] == 1
+          assert next(item['name'] for item in data['names'] if item['language']['name'] == 'ko') == '이상해씨'
+          print('PokeAPI Korean species contract verified')
+          PY
+      - name: Build small installable ARM64 preview
+        env:
+          POKOPIA_PREVIEW_SIGNING: 'true'
+        run: flutter build apk --release --target-platform android-arm64
+      - name: Verify and package APK
+        run: |
+          python3 tool/verify_arm64.py build/app/outputs/flutter-apk/app-release.apk
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$BUILD_TOOLS/apksigner" verify --verbose build/app/outputs/flutter-apk/app-release.apk
+          "$BUILD_TOOLS/aapt2" dump badging build/app/outputs/flutter-apk/app-release.apk > apk-badging.txt
+          grep "application-label:'포코피아 서식지 도감'" apk-badging.txt
+          grep "versionCode='2' versionName='1.1.0'" apk-badging.txt
+          cp build/app/outputs/flutter-apk/app-release.apk pokopia-habitat-guide-arm64-preview.apk
+          sha256sum pokopia-habitat-guide-arm64-preview.apk > pokopia-habitat-guide-arm64-preview.apk.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokopia-habitat-guide-installable-arm64
+          path: |
+            pokopia-habitat-guide-arm64-preview.apk
+            pokopia-habitat-guide-arm64-preview.apk.sha256
+      - name: Publish downloadable APK prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create v1.1.0-preview.1 pokopia-habitat-guide-arm64-preview.apk pokopia-habitat-guide-arm64-preview.apk.sha256 --prerelease --target "$GITHUB_SHA" --title '포코피아 서식지 도감 1.1 · 한글 이름' --notes-file RELEASE_NOTES.md

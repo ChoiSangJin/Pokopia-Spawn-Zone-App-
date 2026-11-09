@@ -1,0 +1,68 @@
+name: Release Android
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag matching pubspec version (v1.0.0)'
+        required: true
+        default: v1.1.0
+permissions:
+  contents: write
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+      - name: Validate version and signing inputs
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          python3 - <<'PY'
+          import base64, os, pathlib, re
+          version = re.search(r'^version: ([^+\s]+)', pathlib.Path('pubspec.yaml').read_text(), re.M).group(1)
+          assert os.environ['RELEASE_TAG'] == f'v{version}', 'Tag must match pubspec version'
+          for key in ['KEYSTORE', 'STORE_PASSWORD', 'KEY_PASSWORD', 'KEY_ALIAS']:
+              assert os.environ.get(key), f'Missing signing secret: {key}'
+          pathlib.Path('android/app/release.keystore').write_bytes(base64.b64decode(os.environ['KEYSTORE'], validate=True))
+          def escape(value):
+              return ''.join(f'\\u{ord(c):04x}' if ord(c) > 126 else ('\\' + c if c in '\\:=#! ' else c) for c in value)
+          values = {'storeFile': 'release.keystore', 'storePassword': os.environ['STORE_PASSWORD'], 'keyPassword': os.environ['KEY_PASSWORD'], 'keyAlias': os.environ['KEY_ALIAS']}
+          pathlib.Path('android/key.properties').write_text(''.join(f'{k}={escape(v)}\n' for k, v in values.items()))
+          PY
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --release --target-platform android-arm64
+      - name: Verify and package
+        run: |
+          python3 tool/verify_arm64.py build/app/outputs/flutter-apk/app-release.apk
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$BUILD_TOOLS/apksigner" verify --verbose build/app/outputs/flutter-apk/app-release.apk
+          cp build/app/outputs/flutter-apk/app-release.apk pokopia-arm64-v8a.apk
+          sha256sum pokopia-arm64-v8a.apk > pokopia-arm64-v8a.apk.sha256
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release create "$RELEASE_TAG" pokopia-arm64-v8a.apk pokopia-arm64-v8a.apk.sha256 --target "$GITHUB_SHA" --title "Pokopia $RELEASE_TAG" --generate-notes
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/key.properties android/app/release.keystore
