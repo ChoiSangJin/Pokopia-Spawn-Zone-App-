@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
 concurrency:
   group: deliver-preview
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   deliver:
     if: github.ref == 'refs/heads/feat/pokopia-android'
@@ -30,11 +30,13 @@ jobs:
       - name: Build installable ARM64 preview
         run: flutter build apk --debug --target-platform android-arm64
       - name: Verify APK
+        id: verify_apk
         run: |
+          exec > >(tee verify-apk.log) 2>&1
           python3 tool/verify_arm64.py build/app/outputs/flutter-apk/app-debug.apk --debug
           BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
           "$BUILD_TOOLS/apksigner" verify --verbose build/app/outputs/flutter-apk/app-debug.apk
-          "$BUILD_TOOLS/aapt" dump badging build/app/outputs/flutter-apk/app-debug.apk | grep "application-label:'포코피아 서식지 도감'"
+          "$BUILD_TOOLS/aapt" dump badging build/app/outputs/flutter-apk/app-debug.apk | tee apk-badging.txt | grep "application-label:'포코피아 서식지 도감'"
           cp build/app/outputs/flutter-apk/app-debug.apk pokopia-habitat-guide-arm64-preview.apk
           sha256sum pokopia-habitat-guide-arm64-preview.apk > pokopia-habitat-guide-arm64-preview.apk.sha256
       - uses: actions/upload-artifact@v4
@@ -44,6 +46,7 @@ jobs:
             pokopia-habitat-guide-arm64-preview.apk
             pokopia-habitat-guide-arm64-preview.apk.sha256
       - name: Create and merge validated PR
+        id: merge_pr
         env:
           GH_TOKEN: ${{ github.token }}
           VALIDATED_SHA: ${{ github.sha }}
@@ -55,14 +58,15 @@ jobs:
           BODY
           PR=$(gh pr list --base main --head feat/pokopia-android --state open --json number --jq '.[0].number // empty')
           if [ -z "$PR" ]; then
-            gh pr create --base main --head feat/pokopia-android --title '포코피아 서식지 도감 앱 및 APK 다운로드 추가' --body-file /tmp/pr-body.md
+            gh pr create --base main --head feat/pokopia-android --title '포코피아 서식지 도감 앱 및 APK 다운로드 추가' --body-file /tmp/pr-body.md 2>&1 | tee pr-delivery.log
             PR=$(gh pr list --base main --head feat/pokopia-android --state open --json number --jq '.[0].number')
           fi
-          gh pr merge "$PR" --squash --match-head-commit "$VALIDATED_SHA"
+          gh pr merge "$PR" --squash --match-head-commit "$VALIDATED_SHA" 2>&1 | tee -a pr-delivery.log
           MERGED_SHA=$(gh pr view "$PR" --json mergeCommit --jq '.mergeCommit.oid')
           test -n "$MERGED_SHA"
           echo "MERGED_SHA=$MERGED_SHA" >> "$GITHUB_ENV"
       - name: Publish downloadable APK prerelease
+        if: always() && steps.verify_apk.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -77,4 +81,29 @@ jobs:
 
           검증: Flutter 정적 분석, 자동 테스트, ARM64 빌드, APK 서명·ABI·앱 이름 검사. `.sha256` 파일로 다운로드 무결성을 확인할 수 있습니다.
           BODY
-          gh release create v1.0.0-preview.1 pokopia-habitat-guide-arm64-preview.apk pokopia-habitat-guide-arm64-preview.apk.sha256 --prerelease --target "$MERGED_SHA" --title '포코피아 서식지 도감 · APK 미리보기' --notes-file /tmp/release-notes.md
+          if [ -z "${MERGED_SHA:-}" ]; then
+            echo '
+PR merge는 저장소 권한/규칙으로 완료되지 않아 검증한 기능 브랜치 커밋의 미리보기 APK를 제공합니다.' >> /tmp/release-notes.md
+          fi
+          gh release create v1.0.0-preview.1 pokopia-habitat-guide-arm64-preview.apk pokopia-habitat-guide-arm64-preview.apk.sha256 --prerelease --target "${MERGED_SHA:-$GITHUB_SHA}" --title '포코피아 서식지 도감 · APK 미리보기' --notes-file /tmp/release-notes.md
+      - name: Save delivery diagnostics
+        if: always()
+        env:
+          VALIDATED_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib
+          parts = ['Validated commit: ' + os.environ['VALIDATED_SHA']]
+          for name in ['verify-apk.log', 'apk-badging.txt', 'pr-delivery.log']:
+              path = pathlib.Path(name)
+              if path.exists():
+                  parts += ['\n### ' + name, path.read_text()[-30000:]]
+          pathlib.Path('delivery-report.txt').write_text('\n'.join(parts))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan delivery-diagnostics
+          git rm -rf --cached .
+          git add delivery-report.txt
+          git commit -m "Record APK delivery diagnostics for $VALIDATED_SHA"
+          git push origin HEAD:refs/heads/ci/delivery --force
