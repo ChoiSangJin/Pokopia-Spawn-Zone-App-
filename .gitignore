@@ -117,3 +117,12 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+# Application and signing outputs
+/android/local.properties
+/android/key.properties
+/android/app/*.keystore
+/android/app/*.jks
+/android/gradle/wrapper/gradle-wrapper.jar
+/android/gradlew
+/android/gradlew.bat
+/.flutter-plugins-dependencies

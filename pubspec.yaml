@@ -1,0 +1,22 @@
+name: pokopia_spawn_zone
+description: An offline-friendly Pokopia habitat field guide.
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.5
+  http: ^1.6.0
+  shared_preferences: ^2.5.4
+  cached_network_image: ^3.4.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/translations.json
+    - assets/licenses/pokopiapi.txt
