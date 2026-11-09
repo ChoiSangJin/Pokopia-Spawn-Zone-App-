@@ -82,8 +82,7 @@ jobs:
           검증: Flutter 정적 분석, 자동 테스트, ARM64 빌드, APK 서명·ABI·앱 이름 검사. `.sha256` 파일로 다운로드 무결성을 확인할 수 있습니다.
           BODY
           if [ -z "${MERGED_SHA:-}" ]; then
-            echo '
-PR merge는 저장소 권한/규칙으로 완료되지 않아 검증한 기능 브랜치 커밋의 미리보기 APK를 제공합니다.' >> /tmp/release-notes.md
+            echo 'PR merge는 저장소 권한/규칙으로 완료되지 않아 검증한 기능 브랜치 커밋의 미리보기 APK를 제공합니다.' >> /tmp/release-notes.md
           fi
           gh release create v1.0.0-preview.1 pokopia-habitat-guide-arm64-preview.apk pokopia-habitat-guide-arm64-preview.apk.sha256 --prerelease --target "${MERGED_SHA:-$GITHUB_SHA}" --title '포코피아 서식지 도감 · APK 미리보기' --notes-file /tmp/release-notes.md
       - name: Save delivery diagnostics
