@@ -33,6 +33,7 @@ android {
     buildTypes {
         release {
             if (signingFile.exists()) signingConfig = signingConfigs.getByName("release")
+            else if (System.getenv("POKOPIA_PREVIEW_SIGNING") == "true") signingConfig = signingConfigs.getByName("debug")
         }
     }
 }

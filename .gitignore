@@ -126,3 +126,6 @@ app.*.symbols
 /android/gradlew
 /android/gradlew.bat
 /.flutter-plugins-dependencies
+
+# Reproducible app dependencies
+!/pubspec.lock
