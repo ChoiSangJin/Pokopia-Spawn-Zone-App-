@@ -73,7 +73,7 @@ flutter build apk --release --target-platform android-arm64
 python3 tool/verify_arm64.py build/app/outputs/flutter-apk/app-release.apk
 ```
 
-결과: `build/app/outputs/flutter-apk/app-release.apk`. Gradle에도 `abiFilters += "arm64-v8a"`를 설정했습니다. 실제 ARM64 Android 기기에서 설치·검색·상세·비행기 모드 재실행을 확인하세요. x86 에뮬레이터용 APK는 생성하지 않습니다.
+결과: `build/app/outputs/flutter-apk/app-release.apk`. Gradle에도 `abiFilters += "arm64-v8a"`를 설정하고 `disable-abi-filtering=true`로 Flutter 플러그인이 전체 ABI 기본값으로 덮어쓰지 않게 했습니다. 실제 ARM64 Android 기기에서 설치·검색·상세·비행기 모드 재실행을 확인하세요. x86 에뮬레이터용 APK는 생성하지 않습니다.
 
 ### 서명
 
@@ -107,7 +107,9 @@ gh workflow run release.yml --ref main -f tag=v1.0.0
 
 ## 검증 상태
 
-구현 환경에서 원격 데이터 계약과 fixture 365개 항목을 확인했습니다. Flutter SDK 아티팩트(`storage.googleapis.com`) 및 GitHub API(`api.github.com`)가 환경 정책에서 차단되어 **Flutter analyze/test, Android 빌드, 실제 기기 실행, PR 생성/merge 및 Release 게시가 아직 검증/완료되지 않았습니다**. 저장된 환경 네트워크 초안을 적용한 후 해당 검증을 실행해야 합니다. Android SDK 설치와 배포 서명 키도 필요합니다. CI 파일이 있다는 사실은 CI가 실행·통과했다는 의미가 아닙니다.
+원격 데이터 계약과 fixture 365개 항목을 확인했습니다. GitHub Actions에서 Flutter 정적 분석, 자동 테스트 6개, Android debug/release APK 빌드가 실행됐습니다. ABI 검사에서 Flutter가 ARM64 외 아키텍처를 포함시키는 문제가 확인되어 `disable-abi-filtering=true`로 수정했습니다. 최종 ABI/서명/앱 이름 및 배포 결과는 해당 커밋의 Actions 실행과 Release에서 확인하세요. 실제 Android 기기 실행은 별도 검증이 필요합니다.
+
+로컬 클라우드 머신은 SDK 다운로드(`storage.googleapis.com`)와 GitHub API(`api.github.com`)가 정책으로 차단되어 빌드/배포를 저장소의 GitHub Actions에서 수행합니다. 정식 서명 릴리즈에는 배포 서명 키가 필요하지만 테스트용 APK 미리보기는 별도 사용자 비밀 값 없이 생성합니다.
 
 ## 출처와 라이선스
 
