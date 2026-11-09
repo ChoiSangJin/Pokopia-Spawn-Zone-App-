@@ -1,0 +1,103 @@
+{
+  "categories": {
+    "blocks": "블록",
+    "buildings": "건물",
+    "food": "음식",
+    "fossils": "화석",
+    "furniture": "가구",
+    "key-items": "중요 아이템",
+    "kits": "키트",
+    "lost-relics-l": "큰 유물",
+    "lost-relics-s": "작은 유물",
+    "materials": "재료",
+    "misc": "잡화",
+    "nature": "자연",
+    "other": "기타",
+    "outdoor": "야외",
+    "utilities": "설비"
+  },
+  "types": {
+    "Grass": "풀",
+    "Poison": "독",
+    "Fire": "불꽃",
+    "Flying": "비행",
+    "Water": "물",
+    "Bug": "벌레",
+    "Normal": "노말",
+    "Electric": "전기",
+    "Ground": "땅",
+    "Fairy": "페어리",
+    "Fighting": "격투",
+    "Psychic": "에스퍼",
+    "Rock": "바위",
+    "Steel": "강철",
+    "Ice": "얼음",
+    "Ghost": "고스트",
+    "Dragon": "드래곤",
+    "Dark": "악"
+  },
+  "climates": {
+    "Sunny": "맑음",
+    "Cloudy": "흐림",
+    "Rainy": "비"
+  },
+  "time": {
+    "Morning": "아침",
+    "Day": "낮",
+    "Afternoon": "오후",
+    "Night": "밤"
+  },
+  "idealEnvironments": {
+    "Dark": "어두움",
+    "Illuminated": "밝음",
+    "Warm": "따뜻함"
+  },
+  "specialties": {
+    "Build": "건축",
+    "Burn": "불 피우기",
+    "Chop Wood": "나무 베기",
+    "Collect": "수집",
+    "Demolish": "철거",
+    "DJ": "DJ",
+    "Dream Islands": "꿈의 섬",
+    "Electrify": "발전",
+    "Entertain": "즐겁게 하기",
+    "Explode": "폭발",
+    "Fertilize": "비료 주기",
+    "Fly": "비행",
+    "Gather Honey": "꿀 모으기",
+    "Gorge": "먹기",
+    "Identify": "감정",
+    "Illuminate": "밝히기",
+    "Moisten": "적시기",
+    "Negotiate": "협상",
+    "Optimize": "최적화",
+    "Organize": "정리",
+    "Paint": "색칠",
+    "Party": "파티",
+    "Produce": "생산",
+    "Pulverize": "분쇄",
+    "Rare Materials": "희귀 재료",
+    "Recycle": "재활용",
+    "Store": "보관",
+    "Teleport": "순간이동",
+    "Track": "추적",
+    "Transform": "변신",
+    "Yawn": "하품",
+    "Scrub": "청소",
+    "Litter": "흩뿌리기",
+    "Water": "물 주기",
+    "Hype": "분위기 띄우기"
+  },
+  "habitats": {
+    "Green Grassland": "초록 풀밭",
+    "Bench with Bushes": "덤불이 있는 벤치",
+    "Large Flowerbed": "큰 꽃밭",
+    "Camping Area": "야영지",
+    "Alarm Clock Bedroom": "알람 시계가 있는 침실",
+    "Beautiful Flowerbed": "아름다운 꽃밭"
+  },
+  "spawnZones": {
+    "Bubbly Basin": "Bubbly Basin · 해저 확장 지역"
+  }
+}

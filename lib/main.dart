@@ -12,7 +12,9 @@ import 'services/korean_names.dart';
 
 import 'dart:convert';
 
-import 'views/catalog_view.dart';
+import 'views/home_view.dart';
+import 'controllers/items_controller.dart';
+import 'services/items_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +47,11 @@ Future<void> main() async {
             dispose: (_, client) => client.close(),
           ),
           ChangeNotifierProvider(create: (_) => koreanNames),
+          ChangeNotifierProvider(
+            create: (context) => ItemsController(
+              ItemsService(context.read<http.Client>(), preferences),
+            )..refresh(),
+          ),
           ChangeNotifierProvider(
             create: (context) => CatalogController(
               CatalogService(context.read<http.Client>(), preferences),
@@ -85,6 +92,6 @@ class PokopiaApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff276952)),
       scaffoldBackgroundColor: const Color(0xfff5f7f1),
     ),
-    home: const CatalogView(),
+    home: const HomeView(),
   );
 }

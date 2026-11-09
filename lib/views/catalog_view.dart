@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../controllers/catalog_controller.dart';
 import '../services/translations.dart';
 import '../widgets/pokemon_image.dart';
+import '../widgets/content_filter.dart';
 import 'detail_view.dart';
 
 class CatalogView extends StatelessWidget {
@@ -22,7 +23,7 @@ class CatalogView extends StatelessWidget {
             onPressed: () => showAboutDialog(
               context: context,
               applicationName: '포코피아 서식지 도감',
-              applicationVersion: '1.1.0',
+              applicationVersion: '1.2.0',
               children: [
                 const Text(
                   '비공식 팬 도감 · 데이터: QuesoCaliente/pokopiapi. Nintendo 및 The Pokémon Company와 관련이 없습니다.',
@@ -54,6 +55,11 @@ class CatalogView extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          ContentFilter(
+            selected: state.source,
+            onChanged: state.filterSource,
+            count: state.countSource,
           ),
           if (state.types.isNotEmpty)
             SizedBox(

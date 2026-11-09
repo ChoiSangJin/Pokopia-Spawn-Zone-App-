@@ -5,6 +5,8 @@ import '../models/pokemon.dart';
 import '../controllers/catalog_controller.dart';
 import '../services/translations.dart';
 import '../widgets/pokemon_image.dart';
+import '../widgets/guide_visual.dart';
+import '../widgets/content_filter.dart';
 
 class DetailView extends StatefulWidget {
   const DetailView({super.key, required this.pokemon});
@@ -40,13 +42,12 @@ class _DetailViewState extends State<DetailView> {
               ),
               if (displayName != p.name) Text(p.name),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final type in p.types)
-                    Chip(label: Text(t.translate('types', type))),
-                ],
+              VisualCapsules(
+                facts: p.typeFacts,
+                section: 'types',
+                translations: t,
               ),
+              Chip(label: Text(contentLabel(p.contentSource))),
               _section(context, '기본 프로필', [
                 _row('전국 도감', p.nationalNumber?.toString() ?? '미제공'),
                 _row(
@@ -59,13 +60,20 @@ class _DetailViewState extends State<DetailView> {
                       ? '미제공'
                       : t.translate('classifications', p.classification!),
                 ),
-                _row('특기', t.list('specialties', p.specialties)),
-                _row(
-                  '생산',
-                  p.produces == null
-                      ? '미제공'
-                      : t.translate('produces', p.produces!),
+                const Text('특기', style: TextStyle(fontWeight: FontWeight.w600)),
+                VisualCapsules(
+                  facts: p.specialtyFacts,
+                  section: 'specialties',
+                  translations: t,
+                  fallback: Icons.handyman_outlined,
                 ),
+                if (p.produceFact != null)
+                  VisualCapsules(
+                    facts: [p.produceFact!],
+                    section: 'produces',
+                    translations: t,
+                    fallback: Icons.eco_outlined,
+                  ),
               ]),
               _section(context, '서식 조건', [
                 _row('출현 지역', t.list('spawnZones', p.zones)),
@@ -75,8 +83,23 @@ class _DetailViewState extends State<DetailView> {
                       ? '미제공'
                       : t.translate('idealEnvironments', p.environment!),
                 ),
-                _row('날씨', t.list('climates', p.climates)),
-                _row('시간대', t.list('time', p.times)),
+                const Text('날씨', style: TextStyle(fontWeight: FontWeight.w600)),
+                VisualCapsules(
+                  facts: p.climateFacts,
+                  section: 'climates',
+                  translations: t,
+                  fallback: Icons.wb_sunny_outlined,
+                ),
+                const Text(
+                  '시간대',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                VisualCapsules(
+                  facts: p.timeFacts,
+                  section: 'time',
+                  translations: t,
+                  fallback: Icons.schedule,
+                ),
               ]),
               Text('서식지', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
@@ -90,7 +113,12 @@ class _DetailViewState extends State<DetailView> {
               for (final habitat in p.habitats)
                 Card(
                   child: ListTile(
-                    leading: const Icon(Icons.forest_outlined),
+                    leading: GuideImage(
+                      url: habitat.iconUrl,
+                      label: habitat.name,
+                      size: 60,
+                      fallback: Icons.forest_outlined,
+                    ),
                     title: Text(t.translate('habitats', habitat.name)),
                     subtitle: Text(
                       '희귀도: ${habitat.rarity?.toString() ?? '미제공'}',
@@ -115,7 +143,7 @@ class _DetailViewState extends State<DetailView> {
                     ),
                 ]),
               _section(context, '데이터 안내', [
-                _row('콘텐츠', p.contentSource ?? '원본 도감'),
+                _row('콘텐츠', contentLabel(p.contentSource)),
                 _row('확인 상태', p.dataStatus ?? '원본 값'),
                 if (p.unknownFields.isNotEmpty)
                   _row('미확인 필드', p.unknownFields.join(', ')),
