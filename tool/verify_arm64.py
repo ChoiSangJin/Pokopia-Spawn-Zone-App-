@@ -9,5 +9,6 @@ with zipfile.ZipFile(apk) as archive:
     abis = {name.split('/')[1] for name in entries if name.startswith('lib/') and name.endswith('.so')}
     assert abis == {'arm64-v8a'}, f'Unexpected ABIs: {abis}'
     assert 'lib/arm64-v8a/libflutter.so' in entries, 'Flutter runtime missing'
-    assert 'lib/arm64-v8a/libapp.so' in entries, 'Release app missing'
+    if '--debug' not in sys.argv:
+        assert 'lib/arm64-v8a/libapp.so' in entries, 'Release app missing'
 print(f'arm64-v8a verified: {apk}')
