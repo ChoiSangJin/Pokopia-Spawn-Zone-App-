@@ -128,3 +128,5 @@ gh workflow run release.yml --ref main -f tag=v1.1.0
 [QuesoCaliente/pokopiapi](https://github.com/QuesoCaliente/pokopiapi), 참조 커밋 `893936af1adb51f6d2aab18aa8fa359fc401dd0a`. 원본 365개 항목은 테스트 fixture로만 포함되며 앱의 사전 탑재 데이터로 사용하지 않습니다. 파생 번역과 fixture에는 BSD-3-Clause 고지를 [assets/licenses/pokopiapi.txt](assets/licenses/pokopiapi.txt)에 보존했습니다. 앱 정보 → 라이선스에서도 확인할 수 있습니다. 프로젝트 자체 라이선스는 [LICENSE](LICENSE)를 따릅니다. Pokémon은 해당 권리자의 상표이며 이 앱은 비공식 팬 프로젝트입니다.
 
 PokeAPI 기본 이름 사전 출처: https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon_species_names.csv (2026-11-09 조회). PokeAPI 저작권 고지는 `assets/licenses/pokeapi.txt`와 앱 라이선스 화면에 포함합니다.
+
+배포 시 PokeAPI 실제 접속은 재시도 후 확인합니다. 네트워크 오류면 경고와 SKIPPED로 기록하며, 기본 이름/오프라인 테스트는 계속 필수입니다. 200 응답의 종 번호·한국어 이름이 잘못되면 배포를 중단합니다. 외부 API 중단만으로 오프라인 앱 APK 배포를 막지는 않습니다.
