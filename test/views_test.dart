@@ -29,7 +29,7 @@ void main() {
     expect(find.textContaining('검색 결과가 없습니다'), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'Milotic');
     await tester.pump();
-    await tester.tap(find.text('Milotic'));
+    await tester.tap(find.widgetWithText(Card, 'Milotic'));
     await tester.pumpAndSettle();
     expect(find.text('#E007  Milotic'), findsOneWidget);
     await tester.pageBack();

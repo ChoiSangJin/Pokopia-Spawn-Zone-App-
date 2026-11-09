@@ -44,7 +44,10 @@ class CatalogView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final p = visible[index];
                   return Card(clipBehavior: Clip.antiAlias, child: InkWell(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DetailView(pokemon: p))),
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DetailView(pokemon: p)));
+                    },
                     child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('#${p.number}', style: Theme.of(context).textTheme.labelMedium),
                       Expanded(child: Center(child: PokemonImage(pokemon: p))),
