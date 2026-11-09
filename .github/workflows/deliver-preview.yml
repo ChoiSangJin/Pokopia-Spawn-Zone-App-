@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
 concurrency:
   group: deliver-preview
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   deliver:
     if: github.ref == 'refs/heads/feat/pokopia-android'
